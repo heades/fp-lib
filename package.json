@@ -1,0 +1,19 @@
+{
+  "name": "fp-lib",
+  "version": "0.0.1",
+  "description": "A standard library for pure functional programming in Typescript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "fp",
+    "functional",
+    "programming",
+    "pure",
+    "higher",
+    "order"
+  ],
+  "author": "Harley Eades III",
+  "license": "ISC"
+}
