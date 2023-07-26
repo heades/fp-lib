@@ -1,9 +1,9 @@
-export interface Just<T> {
+interface Just<T> {
     type: "just",
     value: T
 }
 
-export interface Nothing {
+interface Nothing {
     type: "nothing"
 }
 
