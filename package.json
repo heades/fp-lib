@@ -1,10 +1,14 @@
 {
   "name": "@heades/fp-lib",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A standard library for pure functional programming in Typescript.",
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/heades/fp-lib.git"
+},
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
@@ -30,8 +34,7 @@
     "functional",
     "programming",
     "pure",
-    "higher",
-    "order"
+    "higher-order"
   ],
   "author": "Harley Eades III",
   "license": "ISC"
