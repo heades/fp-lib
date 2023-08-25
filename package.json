@@ -1,6 +1,6 @@
 {
   "name": "@heades/fp-lib",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A standard library for pure functional programming in Typescript.",
   "publishConfig": {
     "access": "public"
