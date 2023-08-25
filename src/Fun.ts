@@ -1,4 +1,4 @@
-export const compose = <A,B,C>(f1 : (x:A) => B, f2: (x:B) => C): (x:A) => C => {
+export const compose = <A,B,C>(f2: (x:B) => C, f1 : (x:A) => B): (x:A) => C => {
     return (x:A) => f2(f1(x));
 };
 
