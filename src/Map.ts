@@ -1,26 +1,9 @@
-import Maybe, { just, nothing } from "./Maybe"
-
-interface LT {
-    type: "LT"
-}
-
-interface GT {
-    type: "GT"
-}
-
-interface EQ {
-    type: "EQ"
-}
-
-interface Ord<V> {
-    eq: (v : V) => boolean,
-    lt: (v : V) => boolean,
-    gt: (v : V) => boolean
-}
+import Maybe, { just, nothing } from "./Maybe";
+import { Comparison, Ord, mkEQ, mkGT, mkLT } from "./Ord";
 
 export interface Key<A> extends Ord<A> {
     label: A
-}
+};
 
 const mkKey = <A>(label: A, eq: (a : A) => boolean, lt: (a : A) => boolean, gt: (a : A) => boolean): Key<A> => {
     return {
@@ -28,8 +11,8 @@ const mkKey = <A>(label: A, eq: (a : A) => boolean, lt: (a : A) => boolean, gt: 
         lt: lt,
         gt: gt,
         eq : eq
-    }
-}
+    };
+};
 
 const fromKey = <A>(newLabel: A, key: Key<A>): Key<A> => {
     return {
@@ -37,16 +20,16 @@ const fromKey = <A>(newLabel: A, key: Key<A>): Key<A> => {
         lt: key.lt,
         gt: key.gt,
         eq: key.eq
-    }
-}
+    };
+};
 
-const compare = <V>(v1: Key<V>, v2: V): LT | GT | EQ => {
+const compare = <V>(v1: Key<V>, v2: V): Comparison => {
     if (v1.lt(v2)) {
-        return {type: "LT"}
+        return mkLT();
     } else if (v1.gt(v2)) {
-        return {type: "GT"}
+        return mkGT();
     }
-    return {type: "EQ"}
+    return mkEQ();
 }
 
 export const mkKeyString = (v1 : string): Key<string> => {
@@ -55,17 +38,17 @@ export const mkKeyString = (v1 : string): Key<string> => {
         eq: (v2:string) => v1.localeCompare(v2) == 0,
         lt: (v2:string) => v1.localeCompare(v2) < 0,
         gt: (v2:string) => v1.localeCompare(v2) > 0
-    }
-}
+    };
+};
 
 interface Tip {
     size: 0,
     type: "Tip"
-}
+};
 
 const mkTip = <K,V>(): BinTree<K,V> => {
     return {size: 0, type: "Tip"}
-}
+};
 
 interface Bin<K,V> {
     size: number,
@@ -74,15 +57,15 @@ interface Bin<K,V> {
     left: BinTree<K,V>,
     right: BinTree<K,V>,
     type: "Bin"
-}
+};
 
 const mkBin = <K,V>(size: number, key: K, value: V, left: BinTree<K,V>, right: BinTree<K,V>): BinTree<K,V> => {
     return {size: size, key: key, value: value, left: left, right: right, type: "Bin"}
-}
+};
 
 const bin = <K,V>(key: K, value: V, left: BinTree<K,V>, right: BinTree<K,V>): BinTree<K,V> => {
     return mkBin(left.size + right.size + 1, key, value, left, right);
-}
+};
 
 export type BinTree<K,V> = Tip | Bin<K,V>;
 
@@ -93,24 +76,24 @@ const balance = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree
     let sizeX: number = leftMap.size + rightMap.size + 1;
 
     if (leftMap.size + rightMap.size <= 1) {
-        return mkBin(sizeX, key, value, leftMap, rightMap)
+        return mkBin(sizeX, key, value, leftMap, rightMap);
     } else if (rightMap.size >= delta*leftMap.size) {
-        return rotateLeft(key, value, leftMap, rightMap)
+        return rotateLeft(key, value, leftMap, rightMap);
     } else if (leftMap.size >= delta*rightMap.size) {
-        return rotateRight(key, value, leftMap, rightMap)
+        return rotateRight(key, value, leftMap, rightMap);
     } else {
-        return mkBin(sizeX, key, value, leftMap, rightMap)
-    }
-}
+        return mkBin(sizeX, key, value, leftMap, rightMap);
+    };
+};
 
 const singleLeft = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree<K,V>): BinTree<K,V> => {
     switch (rightMap.type) {
         case("Bin"):
-            return bin(rightMap.key, rightMap.value, bin(key, value, leftMap, rightMap.left), rightMap.right)
+            return bin(rightMap.key, rightMap.value, bin(key, value, leftMap, rightMap.left), rightMap.right);
         case("Tip"):
             throw new Error ("singleLeft: Hit the Tip.");
-    }
-}
+    };
+};
 
 const singleRight = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree<K,V>): BinTree<K,V> => {
     switch (leftMap.type) {
@@ -118,8 +101,8 @@ const singleRight = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: Bin
             return bin(leftMap.key, leftMap.value, leftMap.left, bin(key, value, leftMap.right, rightMap));
         case("Tip"):
             throw new Error ("singleRight: Hit the Tip.");
-    }
-}
+    };
+};
 
 const doubleLeft = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree<K,V>): BinTree<K,V> => {
     switch (rightMap.type) {
@@ -127,14 +110,14 @@ const doubleLeft = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinT
             switch (rightMap.left.type) {
                 case("Bin"):
                     return bin(rightMap.left.key, rightMap.left.value, bin(key, value, leftMap, rightMap.left.left), 
-                            bin(rightMap.key, rightMap.value, rightMap.left.right, rightMap.right))
+                            bin(rightMap.key, rightMap.value, rightMap.left.right, rightMap.right));
                 case("Tip"):
                     throw new Error ("doubleLeft: Hit the Tip.");
             }
         case("Tip"):
             throw new Error ("doubleLeft: Hit the Tip.");
     }
-}
+};
 
 const doubleRight = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree<K,V>): BinTree<K,V> => {
     switch (leftMap.type) {
@@ -149,7 +132,7 @@ const doubleRight = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: Bin
         case("Tip"):
             throw new Error ("doubleRight: Hit the Tip.");
     }
-}
+};
 
 const rotateLeft = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree<K,V>): BinTree<K,V> => {
     switch (rightMap.type) {
@@ -162,7 +145,7 @@ const rotateLeft = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinT
         case("Tip"):
             throw new Error ("rotateLeft: Hit the Tip.");
     }
-}
+};
 
 const rotateRight = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: BinTree<K,V>): BinTree<K,V> => {
     switch (leftMap.type) {
@@ -175,7 +158,7 @@ const rotateRight = <K,V>(key: K, value: V, leftMap: BinTree<K,V>, rightMap: Bin
         case("Tip"):
             throw new Error ("rotateRight: Hit the Tip.");
     }
-}
+};
 
 export const empty = <K,V>(): BinTree<K,V> => mkTip();
 
@@ -186,29 +169,29 @@ export const insert = <K,V>(key: Key<K>, value: V, map: BinTree<K,V>): BinTree<K
         case("Bin"):
             switch (compare(key, map.key).type) {
                 case ("LT"):
-                    return balance(map.key, map.value, insert(key, value, map.left), map.right)
+                    return balance(map.key, map.value, insert(key, value, map.left), map.right);
                 case ("GT"):
-                    return balance(map.key, map.value, map.left, insert(key, value, map.right))
+                    return balance(map.key, map.value, map.left, insert(key, value, map.right));
                 case ("EQ"):
-                    return mkBin(map.size, key.label, value, map.left, map.right)
+                    return mkBin(map.size, key.label, value, map.left, map.right);
             }
         case("Tip"):
             return singleton(key,value);
     }
-}
+};
 
 export const lookup = <K,V>(key: Key<K>, map: BinTree<K,V>): Maybe<V> => {
     switch (map.type) {
         case("Bin"):
             switch (compare(key, map.key).type) {
                 case("LT"):
-                    return lookup(key, map.left)
+                    return lookup(key, map.left);
                 case("GT"):
-                    return lookup(key, map.right)
+                    return lookup(key, map.right);
                 case("EQ"):
-                    return just(map.value)
+                    return just(map.value);
             }
         case("Tip"):
             return nothing;
     }
-}
+};
